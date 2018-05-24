@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class Board {
 
 	public enum Color {
-		BLANK(0), BLACK(1), WHITE(2);
+		BLANK(0), BLACK(1), WHITE(2), POSSIBLEMOVE(3);
 
 		private int value;
 
@@ -28,32 +28,40 @@ public class Board {
 
 	private static int BOARD_SIZE = 8;
 
+	private GameState gameState;
 	private int[][] cells;
-	private Color turn = Color.BLACK;
 	private Color lastTurn = Color.BLACK;
 	private int[][] boardBeforeMove;
 
 	public Board() {
+		init();
+
+		printBoard();
+	}
+
+	public void init() {
+		gameState = new GameState();
+
 		cells = new int[BOARD_SIZE][BOARD_SIZE];
 		cells[3][3] = Color.WHITE.getValue();
 		cells[3][4] = Color.BLACK.getValue();
 		cells[4][3] = Color.BLACK.getValue();
 		cells[4][4] = Color.WHITE.getValue();
-		printBoard();
+		gameState.setCurrentlyPossibleMoves(getPossibleMoves(gameState.getCurrentTurn()));
 	}
-	
+
 	public int[][] getCells() {
 		return cells;
 	}
 
 	public void printBoard() {
 		System.out.println("  A B C D E F G H");
-		for(int i = 0; i < cells.length; i++) {
-			System.out.print((i+1) + " ");
-			for(int j = 0; j < cells.length; j++) {
-				if(cells[i][j] == Color.BLACK.value) {
+		for (int i = 0; i < cells.length; i++) {
+			System.out.print((i + 1) + " ");
+			for (int j = 0; j < cells.length; j++) {
+				if (cells[i][j] == Color.BLACK.value) {
 					System.out.print("● ");
-				} else if(cells[i][j] == Color.WHITE.value) {
+				} else if (cells[i][j] == Color.WHITE.value) {
 					System.out.print("○ ");
 				} else {
 					System.out.print("  ");
@@ -81,37 +89,48 @@ public class Board {
 	public boolean place(String notation) {
 		return place(notationToPosition(notation));
 	}
-	
+
 	public boolean place(Tuple<Integer, Integer> pos) {
-		if (isLegalMove(pos, this.turn)) {
+		if (isLegalMove(pos, gameState.getCurrentTurn())) {
 			boardBeforeMove = deepCopy();
-			List<Tuple<Integer, Integer>> turns = getChanges(pos, this.turn);
-			cells[pos.y][pos.x] = turn.getValue();
+			List<Tuple<Integer, Integer>> turns = getChanges(pos, gameState.getCurrentTurn());
+			cells[pos.y][pos.x] = gameState.getCurrentTurn().getValue();
 
 			for (Tuple<Integer, Integer> t : turns) {
-				cells[t.y][t.x] = turn.value;
+				cells[t.y][t.x] = gameState.getCurrentTurn().value;
 			}
-			
-			lastTurn = turn;
-			if (this.turn.equals(Color.WHITE)) {
-				if (!getPossibleMoves(Color.BLACK).isEmpty()) {
-					this.turn = Color.BLACK;
+
+			lastTurn = gameState.getCurrentTurn();
+			List<Tuple<Integer, Integer>> blackMoves = getPossibleMoves(Color.BLACK);
+			List<Tuple<Integer, Integer>> whiteMoves = getPossibleMoves(Color.WHITE);
+
+			if (this.gameState.getCurrentTurn().equals(Color.WHITE)) {
+				if (!blackMoves.isEmpty()) {
+					this.gameState.setCurrentTurn(Color.BLACK);
+					this.gameState.setCurrentlyPossibleMoves(blackMoves);
 				}
 			} else {
-				if (!getPossibleMoves(Color.WHITE).isEmpty()) {
-					this.turn = Color.WHITE;
+				if (!whiteMoves.isEmpty()) {
+					this.gameState.setCurrentTurn(Color.WHITE);
+					this.gameState.setCurrentlyPossibleMoves(whiteMoves);
 				}
 			}
+
+			if (blackMoves.isEmpty() && whiteMoves.isEmpty()) {
+				gameState.setGameOver(true);
+			}
+			gameState.setWhiteScore(getScore(Color.WHITE));
+			gameState.setBlackScore(getScore(Color.BLACK));
+
 			return true;
 		}
 		return false;
 
 	}
-	
+
 	public void regret() {
 		cells = boardBeforeMove;
-		turn = lastTurn;
-				
+		gameState.setCurrentTurn(lastTurn);
 	}
 
 	public int[][] deepCopy() {
@@ -121,35 +140,31 @@ public class Board {
 		}
 		return newBoard;
 	}
-	
+
 	public boolean isLegalMove(String notation) {
-		return !getChanges(notationToPosition(notation), getTurn()).isEmpty();
+		return !getChanges(notationToPosition(notation), gameState.getCurrentTurn()).isEmpty();
 	}
 
 	public boolean isLegalMove(Tuple<Integer, Integer> pos) {
-		return !getChanges(pos, getTurn()).isEmpty();
+		return !getChanges(pos, gameState.getCurrentTurn()).isEmpty();
 	}
-	
+
 	public boolean isLegalMove(Tuple<Integer, Integer> pos, Color turn) {
 		return !getChanges(pos, turn).isEmpty();
 	}
 
-	public Color getTurn() {
-		return this.turn;
-	}
-	
 	public static Tuple<Integer, Integer> notationToPosition(String notation) {
-		if(!notation.matches("[a-h][1-8]")) {
+		if (!notation.matches("[a-h][1-8]")) {
 			throw new RuntimeException("Invalid");
 		}
 		int x = notation.charAt(0) - 97;
 		int y = notation.charAt(1) - 49;
-		
+
 		return new Tuple<Integer, Integer>(x, y);
 	}
-	
+
 	public static String tupleToNotation(Tuple<Integer, Integer> tuple) {
-		return new StringBuilder().append((char)(tuple.x + 97)).append((char)(tuple.y+49)).toString();
+		return new StringBuilder().append((char) (tuple.x + 97)).append((char) (tuple.y + 49)).toString();
 	}
 
 	public List<Tuple<Integer, Integer>> getChanges(Tuple<Integer, Integer> pos, Color turn) {
@@ -183,6 +198,10 @@ public class Board {
 		// Diagonal bottom right
 		turns.addAll(checkDiagonalDownRight(pos, opponant));
 		return turns;
+	}
+
+	public GameState getState() {
+		return gameState;
 	}
 
 	private Collection<? extends Tuple<Integer, Integer>> checkDiagonalUpLeft(Tuple<Integer, Integer> pos,
@@ -220,7 +239,7 @@ public class Board {
 				return Collections.emptyList();
 			}
 		}
-		return Collections.emptyList(); 
+		return Collections.emptyList();
 	}
 
 	private Collection<? extends Tuple<Integer, Integer>> checkDiagonalDownLeft(Tuple<Integer, Integer> pos,

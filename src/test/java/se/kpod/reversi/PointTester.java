@@ -32,7 +32,7 @@ class PointTester {
 	@Test
 	void testOneMoveScore() {
 		Board b = new Board();
-		assertTrue(b.isLegalMove(new Tuple<Integer, Integer>(2,3), b.getTurn()));
+		assertTrue(b.isLegalMove(new Tuple<Integer, Integer>(2,3), b.getState().getCurrentTurn()));
 		b.place(new Tuple<Integer, Integer>(2, 3));
 		b.printBoard();
 		assertEquals(1, b.getScore(Color.WHITE));
@@ -42,7 +42,7 @@ class PointTester {
 	@Test
 	void testTwoMoveScore() {
 		Board b = new Board();
-		assertTrue(b.isLegalMove(new Tuple<Integer, Integer>(4,5), b.getTurn()));
+		assertTrue(b.isLegalMove(new Tuple<Integer, Integer>(4,5), b.getState().getCurrentTurn()));
 		b.place(new Tuple<Integer, Integer>(4, 5));
 		b.place(new Tuple<Integer, Integer>(5, 5));
 		b.printBoard();
@@ -53,7 +53,7 @@ class PointTester {
 	@Test
 	void testThreeMoveScore() {
 		Board b = new Board();
-		assertTrue(b.isLegalMove(new Tuple<Integer, Integer>(3,2), b.getTurn()));
+		assertTrue(b.isLegalMove(new Tuple<Integer, Integer>(3,2), b.getState().getCurrentTurn()));
 		b.place(new Tuple<Integer, Integer>(3, 2));
 		b.place(new Tuple<Integer, Integer>(2, 4));
 		b.place(new Tuple<Integer, Integer>(4, 5));
@@ -65,7 +65,7 @@ class PointTester {
 	@Test
 	void fullGameDraw() {
 		Board b = new Board();
-		assertTrue(b.isLegalMove(new Tuple<Integer, Integer>(3,2), b.getTurn()));
+		assertTrue(b.isLegalMove(new Tuple<Integer, Integer>(3,2), b.getState().getCurrentTurn()));
 		b.place(new Tuple<Integer, Integer>(2, 3));
 		System.out.println("Move 1");
 		b.printBoard();

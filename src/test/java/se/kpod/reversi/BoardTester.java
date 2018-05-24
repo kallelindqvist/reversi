@@ -22,7 +22,8 @@ public class BoardTester {
 		expected.add(new Tuple<Integer, Integer>(4, 5));
 		expected.add(new Tuple<Integer, Integer>(5, 4));
 
-		List<Tuple<Integer, Integer>> moves = b.getPossibleMoves(b.getTurn());
+		List<Tuple<Integer, Integer>> moves = b.getPossibleMoves(b.getState().getCurrentTurn());
+		assertEquals(b.getState().getCurrentlyPossibleMoves(), moves);
 		
 		assertEquals(expected, moves);
 

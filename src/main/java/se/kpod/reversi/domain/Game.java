@@ -26,13 +26,13 @@ public class Game {
 	public static void loop() {
 		List<String> moves = new ArrayList<>();
 		while (!board.getPossibleMoves(Color.BLACK).isEmpty() || !board.getPossibleMoves(Color.WHITE).isEmpty()) {
-			if (board.getTurn().equals(Color.BLACK)) {
+			if (board.getState().getCurrentTurn().equals(Color.BLACK)) {
 				currentTurn = blackPlayer;
 			} else {
 				currentTurn = whitePlayer;
 			}
 			board.printBoard();
-			System.out.println(String.format("%s players turn", board.getTurn()));
+			System.out.println(String.format("%s players turn", board.getState().getCurrentTurn()));
 			String move = currentTurn.nextMove(board);
 			moves.add(move);
 			board.place(move);
