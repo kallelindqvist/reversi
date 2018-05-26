@@ -16,8 +16,8 @@ public class MinMaxer extends Player {
 	private Color opponent;
 
 	public MinMaxer() {
-		this.myColor = Color.WHITE;
-		opponent = Color.BLACK;
+		this.myColor = Color.BLACK;
+		opponent = Color.WHITE;
 	}
 
 	public MinMaxer(Color myColor) {

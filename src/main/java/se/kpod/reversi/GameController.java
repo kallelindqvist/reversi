@@ -50,7 +50,7 @@ public class GameController {
 		board.printBoard();
 
 		if (valid) {
-			while (!board.getState().isGameOver() && board.getState().getCurrentTurn() == Color.WHITE) {
+			while (!board.getState().isGameOver() && board.getState().getCurrentTurn() == Color.BLACK) {
 				String move = minMaxer.nextMove(board);
 				board.place(move);
 				board.printBoard();
