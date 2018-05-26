@@ -21,7 +21,7 @@ $(function() {
 		var startY = canvas.height() * .1;
 		drawBoard(boardSize, ctx, canvas, startX, startY, rectSize);
 
-		$.get("/state", function(gameState) {
+		$.get("state", function(gameState) {
 			drawInformation(ctx, canvas, rectSize, startX, startY - rectSize,
 					startY + (rectSize * (boardSize + 1)), gameState);
 		});
@@ -45,14 +45,14 @@ $(function() {
 			var gameOver = false;
 			$.ajax({
 				type : 'POST',
-				url : "/place",
+				url : "place",
 				data : {
 					x : xCell,
 					y : yCell
 				},
 				success : function(gameState) {
 					if (gameState.gameOver) {
-						$.post("/reset");
+						$.post("reset");
 					} else {
 						turn ^= 1
 						ctx.clearRect(0, 0, canvas.width(), canvas.height());
@@ -87,7 +87,7 @@ $(function() {
 	function drawBoard(boardSize, ctx, canvas, startX, startY, rectSize) {
 		var path = new Path2D;
 		board = new Array(boardSize);
-		$.get("/board", function(data) {
+		$.get("board", function(data) {
 			board = data;
 			for (i = 0; i < boardSize; i++) {
 				for (j = 0; j < boardSize; j++) {
