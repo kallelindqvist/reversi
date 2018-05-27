@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import se.kpod.reversi.ai.MinMaxer;
 import se.kpod.reversi.domain.Board;
-import se.kpod.reversi.domain.Board.Color;
 import se.kpod.reversi.domain.GameState;
 import se.kpod.reversi.domain.Tuple;
 
@@ -21,9 +21,6 @@ public class GameController {
 
 	@Autowired
 	Board board;
-
-	@Autowired
-	MinMaxer minMaxer;
 
 	@RequestMapping("/board")
 	@ResponseBody
@@ -46,18 +43,37 @@ public class GameController {
 	@PostMapping("/place")
 	@ResponseBody
 	GameState place(@RequestParam int x, @RequestParam int y) {
-		boolean valid = board.place(new Tuple<Integer, Integer>(x, y));
+		Tuple<Integer, Integer> move = new Tuple<Integer, Integer>(x, y);
+		boolean valid = board.place(move);
 		board.printBoard();
 
+		GameState state = board.getState();
+
 		if (valid) {
-			while (!board.getState().isGameOver() && board.getState().getCurrentTurn() == Color.BLACK) {
-				String move = minMaxer.nextMove(board);
-				board.place(move);
-				board.printBoard();
-			}
+			state.addMoveToHistory(Board.tupleToNotation(move));
 		}
 
-		return board.getState();
+		return state;
+	}
+
+	@GetMapping("/move")
+	@ResponseBody
+	GameState move() {
+		GameState state = board.getState();
+		if (state.isGameOver()) {
+			return state;
+		}
+
+		MinMaxer minMaxer = new MinMaxer(state.getCurrentTurn());
+
+		String move = minMaxer.nextMove(board);
+		board.place(move);
+		board.printBoard();
+
+		state = board.getState();
+		state.addMoveToHistory(move);
+
+		return state;
 	}
 
 	public static void main(String[] args) throws Exception {

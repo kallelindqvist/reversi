@@ -1,3 +1,12 @@
+function reset() {
+	$.post({
+		url : "reset",
+		success : function() {
+			location.reload();
+		}
+	});
+}
+
 $(function() {
 
 	// This demo depends on the canvas element
@@ -6,39 +15,36 @@ $(function() {
 		return false;
 	}
 
-	var doc = $(document), win = $(window), canvas = $('#board'), ctx = canvas[0]
-			.getContext('2d')
-	canvas[0].width = win[0].innerWidth;
-	canvas[0].height = win[0].innerHeight;
+	var canvas = document.getElementById("board");
+	var ctx = canvas.getContext('2d')
+	// canvas[0].width = win[0].innerWidth;
+	// canvas[0].height = win[0].innerHeight;
+	var rect = canvas.parentNode.getBoundingClientRect();
+	canvas.width = rect.width;
+	canvas.height = rect.height;
 	init()
 
 	function init() {
 
 		var boardSize = 8
-		var rectSize = Math.min(canvas.width(), canvas.height()) * .8
-				/ boardSize
-		var startX = canvas.width() * .25;
-		var startY = canvas.height() * .1;
+		var rectSize = Math.min(canvas.width, canvas.height) * .8 / boardSize
+		var startX = canvas.width * .5 - (rectSize * (boardSize / 2));
+		var startY = 0;// canvas.height * .1;
 		drawBoard(boardSize, ctx, canvas, startX, startY, rectSize);
-
-		$.get("state", function(gameState) {
-			drawInformation(ctx, canvas, rectSize, startX, startY - rectSize,
-					startY + (rectSize * (boardSize + 1)), gameState);
-		});
 
 		var turn = 0
 		var nrOfClicks = 0;
 		var players = [ "Circle", "Cross" ]
-		canvas.click(function(e) {
+		canvas.addEventListener('click', function(e) {
 			var x = e.clientX
 			var y = e.clientY
 			if (x < startX || x > (startX + rectSize * boardSize) || y < startY
-					|| y > (startY + rectSize * boardSize)) {
+					|| y > (startY + rectSize * boardSize + canvas.offsetTop)) {
 				return
 
 			}
 			x -= startX
-			y -= startY
+			y -= canvas.offsetTop;
 
 			var xCell = parseInt(x / rectSize);
 			var yCell = parseInt(y / rectSize);
@@ -54,24 +60,53 @@ $(function() {
 					if (gameState.gameOver) {
 						$.post("reset");
 					} else {
-						turn ^= 1
-						ctx.clearRect(0, 0, canvas.width(), canvas.height());
+
+						ctx.fillStyle = "#0a870a";
+						ctx.fillRect(startX, startY, rectSize * boardSize,
+								rectSize * boardSize);
 						drawBoard(boardSize, ctx, canvas, startX, startY,
 								rectSize);
-						drawInformation(ctx, canvas, rectSize, startX, startY
-								- rectSize, startY
-								+ (rectSize * (boardSize + 1)), gameState)
 					}
+				},
+				complete : function() {
+					$.get("state", function(gameState) {
+						$("#turn").text(gameState.currentTurn + "s turn")
+						$("#black_score").text(
+								"Black score: " + gameState.blackScore)
+						$("#white_score").text(
+								"White score: " + gameState.whiteScore)
+						$("#moves").text(gameState.moveHistory)
+
+						if (gameState.currentTurn === 'WHITE') {
+							window.setTimeout(function() {
+								$.ajax({
+									type : "GET",
+									url : "move",
+									success : function(gameState) {
+										$("#turn").text(
+												gameState.currentTurn
+														+ "s turn")
+									},
+									complete : function() {
+										drawBoard(boardSize, ctx, canvas,
+												startX, startY, rectSize);
+									}
+
+								})
+							}, 1000)
+						}
+						;
+					});
 				}
 			});
-
 		});
 	}
 
 	function drawInformation(ctx, canvas, rectSize, startX, startY, bottomY,
 			gameState) {
 		ctx.font = "45px Verdana";
-		ctx.fillText("current turn: " + gameState.currentTurn, startX, startY);
+		ctx.fillText("current turn: " + gameState.currentTurn, startX, startY
+				+ rectSize);
 		ctx.fillText("Black: " + gameState.blackScore + " White: "
 				+ gameState.whiteScore, startX, bottomY);
 
@@ -98,7 +133,6 @@ $(function() {
 					} else if (board[j][i] == 2) {
 						drawCircle(i, j, rectSize, startX, startY, 'white')
 					}
-
 				}
 			}
 			ctx.stroke(path);

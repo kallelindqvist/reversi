@@ -4,14 +4,22 @@
 <head>
 <meta charset="utf-8" />
 <title>Reversi</title>
-
+<link rel="stylesheet" href="assets/css/styles.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
 
-	<canvas id="board" style='position: absolute; left: 0px; top: 0px;'>
-        Your browser needs to support canvas for this to work!
-    </canvas>
+	<div id="turn" class="info">Whos turn?</div>
+	<div class="main">
+		<canvas id="board">
+			Your browser needs to support canvas for this to work!
+		</canvas>
+	</div>
+	<div id="black_score" class="info">Black score: 0</div>
+	<div id="white_score">White score: 0</div>
+	<div id="moves" class="info">No moves yet</div>
+	<input type="submit" onclick="reset()" value="Reset" />
 
 	<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="assets/js/script.js"></script>
