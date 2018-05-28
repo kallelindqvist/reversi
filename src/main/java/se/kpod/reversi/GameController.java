@@ -1,5 +1,7 @@
 package se.kpod.reversi;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -32,6 +34,22 @@ public class GameController {
 	@ResponseBody
 	void reset() {
 		board.init();
+	}
+
+	@PostMapping("/resetTo")
+	@ResponseBody
+	void resetTo(@RequestParam int place) {
+		List<String> moves = board.getState().getMoveHistory();
+		if (place < 0 || place > moves.size()) {
+			// Out of range
+			return;
+		}
+		board.init();
+
+		for (String move : moves.subList(0, place)) {
+			board.place(move);
+			board.getState().addMoveToHistory(move);
+		}
 	}
 
 	@RequestMapping("/state")

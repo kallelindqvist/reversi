@@ -7,6 +7,18 @@ function reset() {
 	});
 }
 
+function resetTo(place) {
+	$.post({
+		url : "resetTo",
+		data : {
+			place : place
+		},
+		success : function() {
+			location.reload();
+		}
+	});
+}
+
 $(function() {
 	if (!('getContext' in document.createElement('canvas'))) {
 		alert('Sorry, it looks like your browser does not support canvas!');
@@ -56,13 +68,6 @@ $(function() {
 			},
 			complete : function() {
 				$.get("state", function(gameState) {
-					$("#turn").text(gameState.currentTurn + "s turn")
-					$("#black_score").text(
-							"Black score: " + gameState.blackScore)
-					$("#white_score").text(
-							"White score: " + gameState.whiteScore)
-					$("#moves").text(gameState.moveHistory)
-
 					if (gameState.currentTurn === 'WHITE') {
 						window.setTimeout(function() {
 							$.ajax({
@@ -106,7 +111,21 @@ $(function() {
 				}
 			}
 			ctx.stroke(path);
-		})
+		});
+
+		$.get("state", function(gameState) {
+			$("#turn").text(gameState.currentTurn + "s turn")
+			$("#black_score").text("Black score: " + gameState.blackScore);
+			$("#white_score").text("White score: " + gameState.whiteScore);
+			$("#moves").text("");
+			var i;
+			for (i = 0; i < gameState.moveHistory.length; i++) {
+				$("#moves").append(
+						"<a onclick=\"javascript:resetTo(" + (i + 1) + ")\">"
+								+ gameState.moveHistory[i] + "</a> ")
+			}
+			;
+		});
 	}
 
 	function drawCircle(x, y, color) {
