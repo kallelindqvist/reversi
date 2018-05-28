@@ -29,7 +29,7 @@ public class Board {
 	private static int BOARD_SIZE = 8;
 
 	private GameState gameState;
-	private int[][] cells;
+
 	private Color lastTurn = Color.BLACK;
 	private int[][] boardBeforeMove;
 
@@ -42,26 +42,17 @@ public class Board {
 	public void init() {
 		gameState = new GameState();
 
-		cells = new int[BOARD_SIZE][BOARD_SIZE];
-		cells[3][3] = Color.WHITE.getValue();
-		cells[3][4] = Color.BLACK.getValue();
-		cells[4][3] = Color.BLACK.getValue();
-		cells[4][4] = Color.WHITE.getValue();
 		gameState.setCurrentlyPossibleMoves(getPossibleMoves(gameState.getCurrentTurn()));
-	}
-
-	public int[][] getCells() {
-		return cells;
 	}
 
 	public void printBoard() {
 		System.out.println("  A B C D E F G H");
-		for (int i = 0; i < cells.length; i++) {
+		for (int i = 0; i < gameState.getBoard().length; i++) {
 			System.out.print((i + 1) + " ");
-			for (int j = 0; j < cells.length; j++) {
-				if (cells[i][j] == Color.BLACK.value) {
+			for (int j = 0; j < gameState.getBoard().length; j++) {
+				if (gameState.getBoard()[i][j] == Color.BLACK.value) {
 					System.out.print("● ");
-				} else if (cells[i][j] == Color.WHITE.value) {
+				} else if (gameState.getBoard()[i][j] == Color.WHITE.value) {
 					System.out.print("○ ");
 				} else {
 					System.out.print("  ");
@@ -78,12 +69,12 @@ public class Board {
 	}
 
 	public int getScore(Color scoreColor) {
-		return Arrays.stream(cells).flatMapToInt(Arrays::stream).mapToObj(i -> Color.values()[i])
+		return Arrays.stream(gameState.getBoard()).flatMapToInt(Arrays::stream).mapToObj(i -> Color.values()[i])
 				.filter(color -> color.equals(scoreColor)).mapToInt(e -> 1).sum();
 	}
 
 	public Color current(Tuple<Integer, Integer> pos) {
-		return Color.values()[cells[pos.y][pos.x]];
+		return Color.values()[gameState.getBoard()[pos.y][pos.x]];
 	}
 
 	public boolean place(String notation) {
@@ -94,10 +85,10 @@ public class Board {
 		if (isLegalMove(pos, gameState.getCurrentTurn())) {
 			boardBeforeMove = deepCopy();
 			List<Tuple<Integer, Integer>> turns = getChanges(pos, gameState.getCurrentTurn());
-			cells[pos.y][pos.x] = gameState.getCurrentTurn().getValue();
+			gameState.getBoard()[pos.y][pos.x] = gameState.getCurrentTurn().getValue();
 
 			for (Tuple<Integer, Integer> t : turns) {
-				cells[t.y][t.x] = gameState.getCurrentTurn().value;
+				gameState.getBoard()[t.y][t.x] = gameState.getCurrentTurn().value;
 			}
 
 			lastTurn = gameState.getCurrentTurn();
@@ -129,14 +120,14 @@ public class Board {
 	}
 
 	public void regret() {
-		cells = boardBeforeMove;
+		gameState.setBoard(boardBeforeMove);
 		gameState.setCurrentTurn(lastTurn);
 	}
 
 	public int[][] deepCopy() {
 		int[][] newBoard = new int[BOARD_SIZE][BOARD_SIZE];
 		for (int i = 0; i < BOARD_SIZE; i++) {
-			newBoard[i] = Arrays.copyOf(cells[i], BOARD_SIZE);
+			newBoard[i] = Arrays.copyOf(gameState.getBoard()[i], BOARD_SIZE);
 		}
 		return newBoard;
 	}

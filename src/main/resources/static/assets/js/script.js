@@ -36,15 +36,37 @@ $(function() {
 	var startX = canvas.width * .5 - (rectSize * (boardSize / 2));
 	var startY = 0;
 	canvas.addEventListener('click', click);
-	drawBoard();
+	ctx.fillStyle = "#0a870a";
+	ctx.fillRect(startX, startY, rectSize * boardSize, rectSize * boardSize);
+
+	setInterval(loop, 500);
+
+	function loop() {
+		drawBoard();
+		$.get("state", function(gameState) {
+			if (gameState.currentTurn === 'WHITE') {
+				$.ajax({
+					type : "GET",
+					url : "move",
+					success : function(gameState) {
+						$("#turn").text(gameState.currentTurn + "s turn")
+					}
+				})
+			}
+			;
+
+			if (gameState.gameOver) {
+				$.post("reset");
+			}
+		});
+	}
 
 	function click(event) {
 		var x = event.clientX
 		var y = event.clientY
 		if (x < startX || x > (startX + rectSize * boardSize) || y < startY
 				|| y > (startY + rectSize * boardSize + canvas.offsetTop)) {
-			return
-
+			return;
 		}
 		x -= startX
 		y -= canvas.offsetTop;
@@ -59,58 +81,16 @@ $(function() {
 				x : xCell,
 				y : yCell
 			},
-			success : function(gameState) {
-				if (gameState.gameOver) {
-					$.post("reset");
-				} else {
-					drawBoard();
-				}
-			},
-			complete : function() {
-				$.get("state", function(gameState) {
-					if (gameState.currentTurn === 'WHITE') {
-						window.setTimeout(function() {
-							$.ajax({
-								type : "GET",
-								url : "move",
-								success : function(gameState) {
-									$("#turn").text(
-											gameState.currentTurn + "s turn")
-								},
-								complete : function() {
-									drawBoard();
-								}
-
-							})
-						}, 1000)
-					}
-					;
-				});
-			}
+			success : drawBoard()
 		});
 	}
 
 	function drawBoard() {
-		ctx.fillStyle = "#0a870a";
-		ctx
-				.fillRect(startX, startY, rectSize * boardSize, rectSize
-						* boardSize);
+
 		var path = new Path2D;
 		board = new Array(boardSize);
 		$.get("board", function(data) {
-			board = data;
-			for (i = 0; i < boardSize; i++) {
-				for (j = 0; j < boardSize; j++) {
-					path.rect(startX + rectSize * i, startY + rectSize * j,
-							rectSize, rectSize);
-					if (board[j][i] == 1) {
-						drawCircle(i, j, 'black')
-					} else if (board[j][i] == 2) {
-						drawCircle(i, j, 'white')
-					}
-				}
-			}
-			ctx.stroke(path);
+
 		});
 
 		$.get("state", function(gameState) {
@@ -124,7 +104,20 @@ $(function() {
 						"<a onclick=\"javascript:resetTo(" + (i + 1) + ")\">"
 								+ gameState.moveHistory[i] + "</a> ")
 			}
-			;
+
+			for (i = 0; i < boardSize; i++) {
+				for (j = 0; j < boardSize; j++) {
+					path.rect(startX + rectSize * i, startY + rectSize * j,
+							rectSize, rectSize);
+					var value = gameState.board[j][i];
+					if (value == 1) {
+						drawCircle(i, j, 'black')
+					} else if (value == 2) {
+						drawCircle(i, j, 'white')
+					}
+				}
+			}
+			ctx.stroke(path);
 		});
 	}
 

@@ -27,7 +27,7 @@ public class GameController {
 	@RequestMapping("/board")
 	@ResponseBody
 	int[][] board() {
-		return board.getCells();
+		return board.getState().getBoard();
 	}
 
 	@PostMapping("/reset")

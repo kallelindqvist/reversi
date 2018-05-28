@@ -13,6 +13,16 @@ public class GameState {
 	private List<String> moveHistory = new ArrayList<String>();
 	private boolean gameOver = false;
 
+	private int[][] board;
+
+	public GameState() {
+		board = new int[8][8];
+		board[3][3] = Color.WHITE.getValue();
+		board[3][4] = Color.BLACK.getValue();
+		board[4][3] = Color.BLACK.getValue();
+		board[4][4] = Color.WHITE.getValue();
+	}
+
 	public Color getCurrentTurn() {
 		return currentTurn;
 	}
@@ -66,5 +76,13 @@ public class GameState {
 	public boolean isGameOver() {
 		return this.gameOver;
 
+	}
+
+	public int[][] getBoard() {
+		return board;
+	}
+
+	public void setBoard(int[][] board) {
+		this.board = board;
 	}
 }

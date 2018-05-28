@@ -4,18 +4,19 @@ html, body {
 	height: 100%;
 }
 
-
 body {
 	display: flex;
-	flex-direction:column
+	flex-direction: column
 }
-
 
 div {
 	text-align: center;
 	font-size: 3.5vw;
 }
 
+a {
+	cursor: pointer;
+}
 
 .main {
 	flex: 1 1 auto;
