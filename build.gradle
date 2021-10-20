@@ -42,5 +42,5 @@ dependencies {
 	testImplementation('io.projectreactor:reactor-test')
     testImplementation("org.junit.platform:junit-platform-runner:1.1.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.1.0")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.1.0")
 }
