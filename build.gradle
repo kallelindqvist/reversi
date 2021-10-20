@@ -33,14 +33,14 @@ configurations {
 }
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-web')
-	compile('org.springframework.boot:spring-boot-starter-webflux')
-	compile('org.springframework.boot:spring-boot-starter-websocket')
-	compile('org.springframework.session:spring-session-core')
+	implementation('org.springframework.boot:spring-boot-starter-web')
+	implementation('org.springframework.boot:spring-boot-starter-webflux')
+	implementation('org.springframework.boot:spring-boot-starter-websocket')
+	implementation('org.springframework.session:spring-session-core')
 	providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
-	testCompile('io.projectreactor:reactor-test')
-    testCompile("org.junit.platform:junit-platform-runner:1.1.0")
-    testCompile("org.junit.jupiter:junit-jupiter-api:5.1.0")
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
+	testImplementation('io.projectreactor:reactor-test')
+    testImplementation("org.junit.platform:junit-platform-runner:1.1.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.1.0")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0")
 }
